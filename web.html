@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<!-- saved from url=(0038)https://apprtc.appspot.com/?r=88703847 -->
+<html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>WebRTC Reference App</title>
+
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+
+<link rel="canonical" href="web/WebRTC Reference App.html">
+<link rel="stylesheet" href="https://apprtc.appspot.com/css/main.css">
+
+<script type="text/javascript" src="web/jsapi"></script>
+<script src="web/main.js"></script>
+<!-- Load the polyfill to switch-hit between Chrome and Firefox -->
+<script src="web/adapter.js"></script>
+
+<style>#wcs-iframe { display: none; }</style></head>
+<body>
+<script type="text/javascript">
+  var errorMessages = [];
+  var channelToken = 'AHRlWroPDSz8NQ2EKz5qIf3qtQ1O0khJS3vc8eiorWiZHhNtdCrQ1k1OW8JXr5Zu5nAexkCXaSO5Rz5aDJxbfV69_kB5N3iARYn7naKsrgoLWv121lnZGW8';
+  var me = '58397892';
+  var roomKey = '88703847';
+  var roomLink = 'https://apprtc.appspot.com/?r=88703847';
+  var initiator = 0;
+  var pcConfig = {"iceServers": [{"url": "stun:stun.l.google.com:19302"}]};
+  var pcConstraints = {"optional": [{"DtlsSrtpKeyAgreement": true}]};
+  var offerConstraints = {"optional": [], "mandatory": {}};
+  var mediaConstraints = {"audio": true, "video": true};
+  var turnUrl = 'https://computeengineondemand.appspot.com/turn?username=58397892&key=4080218913';
+  var stereo = false;
+  var audio_send_codec = '';
+  var audio_receive_codec = 'opus/48000';
+  setTimeout(initialize, 1);
+</script>
+<div id="container" ondblclick="enterFullScreen()" style="width: 706.6666666666666px; height: 530px; left: 372.6666666666667px; top: 0px;">
+  <div id="card" style="-webkit-transform: rotateY(180deg);">
+    <div id="local">
+      <video id="localVideo" autoplay="autoplay" muted="true" src="" style="opacity: 1;">
+    </video></div>
+    <div id="remote">
+      <video id="remoteVideo" autoplay="autoplay" src="blob:https%3A//apprtc.appspot.com/8424dbb3-316c-423c-8abc-a1b607f5a8e5" style="opacity: 1;">
+      </video>
+      <div id="mini">
+        <video id="miniVideo" autoplay="autoplay" muted="true" src="blob:https%3A//apprtc.appspot.com/977bb554-92ac-4f13-a74f-ec538bb183c5" style="opacity: 1;">
+      </video></div>
+    </div>
+  </div>
+</div>
+
+<footer id="status"><input type="button" id="hangup" value="Hang up" onclick="onHangup()"></footer>
+<div id="infoDiv"><pre>Gathered ICE Candidates
+Local:
+  HOST
+  STUN
+Remote:
+  HOST
+  STUN
+  TURN
+Gathering: complete
+</pre>
+<pre>PC State:
+Signaling: stable
+ICE: connected
+</pre></div>
+<iframe name="wcs-iframe" id="wcs-iframe" src="web/d.html" style="height: 100%; width: 100%;"></iframe></body></html>

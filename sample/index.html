@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <title></title>
+  <script src="js/jquery.js"></script>
+  <script src="js/peer.js"></script>
+</head>
+<body>
+  <input type="text" id="dist-peer-id">
+  <input type="button" id="send-btn" value="send">
+  <script>
+    $(document).ready(function() {
+      var peer = new Peer({key: 'c19ba4aa-5e7e-11e3-922a-9dbb37b59888'});
+
+      peer.on('open', function(id) {
+        console.log('My peer ID is : ' + id);
+      });
+
+      $('#send-btn').on('click', function() {
+        var distPeerId = $('#dist-peer-id').val();
+        if (!distPeerId) {
+          alert('distPeerId must not be null');
+        } else {
+          var conn = peer.connect(distPeerId);
+          console.log(conn);
+          conn.on('open', function() {
+            // メッセージを受信
+            conn.on('data', function(data) {
+              console.log('Received', data);
+            });
+            // メッセージを送信
+            conn.send('Hello! send!');
+          });
+        }
+      });
+
+      peer.on('connection', function(conn){
+        conn.on('open', function() {
+          // メッセージを受信
+          conn.on('data', function(data) {
+            console.log('Received', data);
+          });
+          // メッセージを送信
+          conn.send('Hello! receive!');
+        });
+
+      });
+
+    });
+  </script>
+</body>
+</html>
