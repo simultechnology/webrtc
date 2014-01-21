@@ -9,6 +9,9 @@
 <body>
   <input type="text" id="dist-peer-id">
   <input type="button" id="send-btn" value="send">
+  <div>
+    <video></video>
+  </div>
   <script>
     $(document).ready(function() {
       var peer = new Peer({key: 'c19ba4aa-5e7e-11e3-922a-9dbb37b59888'});
@@ -18,12 +21,52 @@
       });
 
       $('#send-btn').on('click', function() {
-        var distPeerId = $('#dist-peer-id').val();
-        if (!distPeerId) {
+        var destPeerId = $('#dist-peer-id').val();
+        if (!destPeerId) {
           alert('distPeerId must not be null');
         } else {
-          var conn = peer.connect(distPeerId);
-          console.log(conn);
+
+          navigator.getMedia = ( navigator.getUserMedia ||
+              navigator.webkitGetUserMedia ||
+              navigator.mozGetUserMedia ||
+              navigator.msGetUserMedia);
+
+          navigator.getMedia (
+
+              // constraints
+              {
+                video: true,
+                audio: true
+              },
+
+              // successCallback
+              function(localMediaStream) {
+
+                var call = peer.call(destPeerId,
+                    localMediaStream);
+
+                call.on('stream', function(stream) {
+                  console.log(stream);
+                  // `stream` is the MediaStream of the remote peer.
+                  // Here you'd add it to an HTML video/canvas element.
+                });
+
+                var video = document.querySelector('video');
+                video.src = window.URL.createObjectURL(localMediaStream);
+                video.onloadedmetadata = function(e) {
+                  // Do something with the video here.
+                };
+              },
+
+              // errorCallback
+              function(err) {
+                console.log("The following error occured: " + err);
+              }
+
+          );
+
+
+          var conn = peer.connect(destPeerId);
           conn.on('open', function() {
             // メッセージを受信
             conn.on('data', function(data) {
@@ -35,6 +78,7 @@
         }
       });
 
+      // 接続イベントの受信
       peer.on('connection', function(conn){
         conn.on('open', function() {
           // メッセージを受信
@@ -45,6 +89,12 @@
           conn.send('Hello! receive!');
         });
 
+      });
+
+      peer.on('call', function(call) {
+        // Answer the call, providing our mediaStream
+//        console.log(mediaStream);
+        call.answer(mediaStream);
       });
 
     });
