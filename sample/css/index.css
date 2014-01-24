@@ -1,0 +1,13 @@
+input {
+  font-size: 1.6rem;
+}
+
+input.wider {
+  min-width: 80%;
+}
+
+video {
+  width: 65%;
+  display: none;
+}
+

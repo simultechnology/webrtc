@@ -2,21 +2,27 @@
 <html lang="ja">
 <head>
   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
   <title></title>
   <link href="css/index.css" rel="stylesheet" type="text/css">
   <script src="js/jquery.js"></script>
   <script src="js/peer.js"></script>
 </head>
 <body>
-  <input type="text" id="dist-peer-id">
-  <input type="button" id="send-btn" value="send">
+  <input type="text" id="dist-peer-id" class="wider">
+  <input type="button" id="send-btn" value="copy">
   <div>
-    <video autoplay="autoplay"></video>
+    <video id="self-video" autoplay="autoplay" muted></video>
   </div>
   <div>
-    <video id="counterpart" autoplay="autoplay"></video>
+    <video id="counter-video" autoplay="autoplay" muted></video>
   </div>
   <script>
+
+    var destPeerId = location.hash;
+    if (destPeerId) {
+      destPeerId = destPeerId.replace('#', '');
+    }
 
     navigator.getMedia = ( navigator.getUserMedia ||
         navigator.webkitGetUserMedia ||
@@ -27,7 +33,24 @@
       var peer = new Peer({key: 'c19ba4aa-5e7e-11e3-922a-9dbb37b59888'});
 
       peer.on('open', function(id) {
-        console.log('My peer ID is : ' + id);
+        //console.log('My peer ID is : ' + id);
+        var myUrl = location.href.split('#')[0] + '#' + id;
+
+        $.ajax({
+          url: 'https://www.googleapis.com/urlshortener/v1/url?key=AIzaSyDd7l6kYBdGAXIn9Y8_lv3XbFC6KWuJSts',
+          type: 'POST',
+          contentType: 'application/json; charset=utf-8',
+          data: '{ longUrl: "' + myUrl +'"}',
+          dataType: 'json',
+          success: function(response) {
+            var shortenedUrl = response.id;
+            $('#dist-peer-id').val(shortenedUrl);
+            $('#dist-peer-id').focus();
+            $('#dist-peer-id').select();
+          }
+        });
+
+
       });
 
       navigator.getMedia(
@@ -39,29 +62,26 @@
 
           // successCallback
           function(localMediaStream) {
-
-            $('#send-btn').on('click', function() {
-              var destPeerId = $('#dist-peer-id').val();
-              if (!destPeerId) {
-                alert('distPeerId must not be null');
-              } else {
-                var conn = peer.connect(destPeerId);
-                conn.on('open', function() {
-                  // メッセージを受信
-                  conn.on('data', function(data) {
-                    console.log('Received', data);
-                  });
-                  // メッセージを送信
-                  conn.send('Hello! send!');
+            if (!destPeerId) {
+              //alert('distPeerId must not be null');
+            } else {
+              var conn = peer.connect(destPeerId);
+              conn.on('open', function() {
+                console.log(conn);
+                // メッセージを受信
+                conn.on('data', function(data) {
+                  console.log('Received', data);
                 });
-              }
-
+                // メッセージを送信
+                conn.send('Hello! send!');
+              });
               var call = peer.call(destPeerId,
                   localMediaStream);
 
               call.on('stream', function(stream) {
                 console.log(stream);
-                var video = $('#counterpart');
+                var video = $('#counter-video');
+                $(video).css('display', 'block');
                 $(video).attr('src', window.URL.createObjectURL(stream));
                 video.onloadedmetadata = function(e) {
                   // Do something with the video here.
@@ -69,9 +89,11 @@
                 // `stream` is the MediaStream of the remote peer.
                 // Here you'd add it to an HTML video/canvas element.
               });
-            });
-            var video = document.querySelector('video');
-            video.src = window.URL.createObjectURL(localMediaStream);
+            }
+
+            var video = $('#self-video');
+            $(video).css('display', 'block');
+            video.attr('src', window.URL.createObjectURL(localMediaStream));
             video.onloadedmetadata = function(e) {
               // Do something with the video here.
             };
@@ -112,7 +134,8 @@
               call.answer(localMediaStream);
 
               call.on('stream', function(stream){
-                var video = $('#counterpart');
+                var video = $('#counter-video');
+                $(video).css('display', 'block');
                 $(video).attr('src', window.URL.createObjectURL(stream));
                 video.onloadedmetadata = function(e) {
                   // Do something with the video here.
