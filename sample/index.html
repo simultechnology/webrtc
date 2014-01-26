@@ -7,7 +7,8 @@
   <link href="css/index.css" rel="stylesheet" type="text/css">
   <script src="js/jquery.js"></script>
   <script src="js/peer.js"></script>
-  <script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>
+  <!--<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>-->
+  <script src="http://developers.its-mo.com/apps/key/cgi/loader.cgi?key=6fd9cdd77d6152bba25b94ca5833d76e&ver=2.0&enc=SJIS&api=zdcmap.js,search.js,userwidget.js&force=1" type="text/javascript"></script>
 </head>
 <body>
   <input type="text" id="dist-peer-id" class="wider">
@@ -25,24 +26,14 @@
 
     var map;
 
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(function(position) {
-        var lat = position.coords.latitude;
-        var lon = position.coords.longitude;
-        initialize(lat, lon);
-      });
-    }
-
     function initialize(lat, lon) {
       var mapOptions = {
-        zoom: 18,
-        center: new google.maps.LatLng(lat, lon)
+        zoom: 12,
+        latlon: new ZDC.LatLon(lat, lon)
       };
-      map = new google.maps.Map(document.getElementById('map'),
+      map = new ZDC.Map(document.getElementById('map'),
           mapOptions);
     }
-
-    //google.maps.event.addDomListener(window, 'load', initialize);
 
     var destPeerId = location.hash;
     if (destPeerId) {
@@ -53,6 +44,91 @@
         navigator.webkitGetUserMedia ||
         navigator.mozGetUserMedia ||
         navigator.msGetUserMedia);
+
+    $(document).ready(function() {
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(function(position) {
+          var lat = position.coords.latitude;
+          var lon = position.coords.longitude;
+          console.log(lat);
+          initialize(lat, lon);
+        });
+      } else {
+        initialize(35.621739, 139.749398);
+      }
+
+
+      var peer = new Peer({key: 'c19ba4aa-5e7e-11e3-922a-9dbb37b59888'});
+      peer.on('open', function(id) {
+        shortenMyUrl(id);
+      });
+
+      navigator.getMedia(
+          {
+            video: true,
+            audio: true
+          },
+          function(localMediaStream) {
+            if (destPeerId) {
+              var conn = peer.connect(destPeerId);
+              conn.on('open', function() {
+                // メッセージを受信
+                conn.on('data', function(data) {
+                  console.log('Received', data);
+                });
+                // メッセージを送信
+                conn.send('Hello! send!');
+              });
+              var call = peer.call(destPeerId,
+                  localMediaStream);
+
+              call.on('stream', function(stream) {
+                createVideoByStream('#counter-video', stream);
+                // `stream` is the MediaStream of the remote peer.
+                // Here you'd add it to an HTML video/canvas element.
+              });
+            }
+            createVideoByStream('#self-video', localMediaStream);
+          },
+          // errorCallback
+          function(err) {
+            console.log("The following error occured: " + err);
+          }
+      );
+
+      // 接続イベントの受信
+      peer.on('connection', function(conn){
+        conn.on('open', function() {
+          // メッセージを受信
+          conn.on('data', function(data) {
+            console.log('Received', data);
+          });
+          // メッセージを送信
+          conn.send('Hello! receive!');
+        });
+      });
+
+      peer.on('call', function(call) {
+        // Answer the call, providing our mediaStream
+//        console.log(mediaStream);
+        navigator.getMedia({
+              video: true,
+              audio: true
+            },
+            function(localMediaStream) {
+              call.answer(localMediaStream);
+              call.on('stream', function(stream){
+                createVideoByStream('#counter-video', stream);
+              });
+            },
+            // errorCallback
+            function(err) {
+              console.log("The following error occured: " + err);
+            }
+        );
+      });
+    });
 
     function shortenMyUrl(id) {
       var myUrl = location.href.split('#')[0] + '#' + id;
@@ -70,112 +146,15 @@
         }
       });
     }
-    $(document).ready(function() {
-      var peer = new Peer({key: 'c19ba4aa-5e7e-11e3-922a-9dbb37b59888'});
 
-      peer.on('open', function(id) {
-        shortenMyUrl(id);
-      });
-
-      navigator.getMedia(
-          // constraints
-          {
-            video: true,
-            audio: true
-          },
-
-          // successCallback
-          function(localMediaStream) {
-            if (!destPeerId) {
-              //alert('distPeerId must not be null');
-            } else {
-              var conn = peer.connect(destPeerId);
-              conn.on('open', function() {
-                console.log(conn);
-                // メッセージを受信
-                conn.on('data', function(data) {
-                  console.log('Received', data);
-                });
-                // メッセージを送信
-                conn.send('Hello! send!');
-              });
-              var call = peer.call(destPeerId,
-                  localMediaStream);
-
-              call.on('stream', function(stream) {
-                console.log(stream);
-                var video = $('#counter-video');
-                $(video).css('display', 'block');
-                $(video).attr('src', window.URL.createObjectURL(stream));
-                video.onloadedmetadata = function(e) {
-                  // Do something with the video here.
-                };
-                // `stream` is the MediaStream of the remote peer.
-                // Here you'd add it to an HTML video/canvas element.
-              });
-            }
-
-            var video = $('#self-video');
-            $(video).css('display', 'block');
-            video.attr('src', window.URL.createObjectURL(localMediaStream));
-            video.onloadedmetadata = function(e) {
-              // Do something with the video here.
-            };
-
-
-          },
-
-          // errorCallback
-          function(err) {
-            console.log("The following error occured: " + err);
-          }
-
-      );
-
-
-      // 接続イベントの受信
-      peer.on('connection', function(conn){
-        conn.on('open', function() {
-          // メッセージを受信
-          conn.on('data', function(data) {
-            console.log('Received', data);
-          });
-          // メッセージを送信
-          conn.send('Hello! receive!');
-        });
-
-      });
-
-      peer.on('call', function(call) {
-        // Answer the call, providing our mediaStream
-//        console.log(mediaStream);
-        navigator.getMedia({
-              video: true,
-              audio: true
-            },
-            function(localMediaStream) {
-
-              call.answer(localMediaStream);
-
-              call.on('stream', function(stream){
-                var video = $('#counter-video');
-                $(video).css('display', 'block');
-                $(video).attr('src', window.URL.createObjectURL(stream));
-                video.onloadedmetadata = function(e) {
-                  // Do something with the video here.
-                };
-              });
-            },
-
-            // errorCallback
-            function(err) {
-              console.log("The following error occured: " + err);
-            }
-
-        );
-      });
-
-    });
+    function createVideoByStream(id, stream) {
+      var video = $(id);
+      $(video).css('display', 'block');
+      $(video).attr('src', window.URL.createObjectURL(stream));
+      video.onloadedmetadata = function (e) {
+        // Do something with the video here.
+      };
+    }
   </script>
 </body>
 </html>
