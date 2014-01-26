@@ -8,11 +8,20 @@
   <script src="js/jquery.js"></script>
   <script src="js/peer.js"></script>
   <!--<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>-->
-  <script src="http://developers.its-mo.com/apps/key/cgi/loader.cgi?key=6fd9cdd77d6152bba25b94ca5833d76e&ver=2.0&enc=SJIS&api=zdcmap.js,search.js,userwidget.js&force=1" type="text/javascript"></script>
+  <script src="http://developers.its-mo.com/apps/key/cgi/loader.cgi?key=6fd9cdd77d6152bba25b94ca5833d76e&ver=2.0&enc=SJIS&api=zdcmap.js,search.js,control.js,userwidget.js&force=1" type="text/javascript"></script>
 </head>
 <body>
   <input type="text" id="dist-peer-id" class="wider">
   <input type="button" id="send-btn" value="copy">
+  <a href="http://line.naver.jp/R/msg/text/?LINE%E3%81%A7%E9%80%81%E3%82%8B%0D%0Ahttp%3A%2F%2Fline.naver.jp%2F"><img src="./images/linebutton_36x60.png" width="40" height="70" alt="LINE" /></
+
+  <span>
+  <script type="text/javascript" src="//media.line.naver.jp/js/line-button.js?v=20131101" ></script>
+  <script type="text/javascript">
+  new jp.naver.line.media.LineButton({"pc":false,"lang":"ja","type":"e","text":"ここにURLを挿入","withUrl":true});
+  </script>
+  </span>
+
   <div id="map">
     <div>
       <video id="self-video" autoplay="autoplay" muted></video>
@@ -25,20 +34,23 @@
 
     var map;
 
-    var myLatlon;
-
     function initialize(lat, lon) {
-      var latlon = ZDC.wgsTotky(new ZDC.LatLon(lat, lon));
-      myLatlon = {
-        lat: latlon.lat,
-        lon: latlon.lon
-      };
       var options = {
         zoom: 12,
         latlon: latlon
       };
       $('#map').css('height', $(window).height());
       map = new ZDC.Map(document.getElementById('map'), options);
+      control_widget = new ZDC.Control(
+        {
+           pos: {
+               top: 10,
+               left: 10
+           },
+           type: ZDC.CTRL_TYPE_NORMAL
+        }
+      );
+      map.addWidget(control_widget);
 
       // 自分のマーカを作成
       var mrk = new ZDC.Marker(latlon, {
