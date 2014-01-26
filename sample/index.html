@@ -25,13 +25,26 @@
 
     var map;
 
+    var myLatlon;
+
     function initialize(lat, lon) {
+      var latlon = ZDC.wgsTotky(new ZDC.LatLon(lat, lon));
+      myLatlon = {
+        lat: latlon.lat,
+        lon: latlon.lon
+      };
       var options = {
         zoom: 12,
-        latlon: new ZDC.LatLon(lat, lon)
+        latlon: latlon
       };
       $('#map').css('height', $(window).height());
       map = new ZDC.Map(document.getElementById('map'), options);
+
+      // 自分のマーカを作成
+      var mrk = new ZDC.Marker(latlon, {
+        color: ZDC.MARKER_COLOR_ID_BLUE_L
+      });
+      map.addWidget(mrk);
     }
 
     var destPeerId = location.hash;
@@ -44,6 +57,15 @@
         navigator.mozGetUserMedia ||
         navigator.msGetUserMedia);
 
+    function addRemoteMarker(data) {
+      // リモートがマーカを作成
+      var latlon = new ZDC.LatLon(data.lat, data.lon);
+      var mrk = new ZDC.Marker(latlon, {
+        color: ZDC.MARKER_COLOR_ID_RED_L
+      });
+      map.addWidget(mrk);
+    }
+
     $(document).ready(function() {
 
       if (navigator.geolocation) {
@@ -52,10 +74,7 @@
           var lon = position.coords.longitude;
           initialize(lat, lon);
         });
-      } else {
-        initialize(35.621739, 139.749398);
       }
-
 
       var peer = new Peer({key: 'c19ba4aa-5e7e-11e3-922a-9dbb37b59888'});
       peer.on('open', function(id) {
@@ -71,12 +90,10 @@
             if (destPeerId) {
               var conn = peer.connect(destPeerId);
               conn.on('open', function() {
-                // メッセージを受信
-                conn.on('data', function(data) {
-                  console.log('Received', data);
-                });
+                // リモートが位置情報を受信
+                conn.on('data', addRemoteMarker);
                 // メッセージを送信
-                conn.send('Hello! send!');
+                conn.send(myLatlon);
               });
               var call = peer.call(destPeerId,
                   localMediaStream);
@@ -99,11 +116,9 @@
       peer.on('connection', function(conn){
         conn.on('open', function() {
           // メッセージを受信
-          conn.on('data', function(data) {
-            console.log('Received', data);
-          });
+          conn.on('data', addRemoteMarker);
           // メッセージを送信
-          conn.send('Hello! receive!');
+          conn.send(myLatlon);
         });
       });
 
