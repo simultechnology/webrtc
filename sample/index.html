@@ -13,26 +13,25 @@
 <body>
   <input type="text" id="dist-peer-id" class="wider">
   <input type="button" id="send-btn" value="copy">
-  <div id="map" style="min-height: 300px;">
-
-  </div>
-  <div>
-    <video id="self-video" autoplay="autoplay" muted></video>
-  </div>
-  <div>
-    <video id="counter-video" autoplay="autoplay" muted></video>
+  <div id="map">
+    <div>
+      <video id="self-video" autoplay="autoplay" muted></video>
+    </div>
+    <div>
+      <video id="counter-video" autoplay="autoplay" muted></video>
+    </div>
   </div>
   <script>
 
     var map;
 
     function initialize(lat, lon) {
-      var mapOptions = {
+      var options = {
         zoom: 12,
         latlon: new ZDC.LatLon(lat, lon)
       };
-      map = new ZDC.Map(document.getElementById('map'),
-          mapOptions);
+      $('#map').css('height', $(window).height());
+      map = new ZDC.Map(document.getElementById('map'), options);
     }
 
     var destPeerId = location.hash;
@@ -51,7 +50,6 @@
         navigator.geolocation.getCurrentPosition(function(position) {
           var lat = position.coords.latitude;
           var lon = position.coords.longitude;
-          console.log(lat);
           initialize(lat, lon);
         });
       } else {

@@ -7,7 +7,21 @@ input.wider {
 }
 
 video {
-  width: 65%;
+  width: 35%;
   display: none;
+}
+
+div#map {
+  position: relative;
+  height: 100%;
+  width: 100%;
+  min-height: 300px;
+}
+
+video#self-video {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 300;
 }
 
