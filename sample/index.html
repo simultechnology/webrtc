@@ -34,7 +34,14 @@
 
     var map;
 
+    var myLatlon;
+
     function initialize(lat, lon) {
+      var latlon = ZDC.wgsTotky(new ZDC.LatLon(lat, lon));
+      myLatlon = {
+        lat: latlon.lat,
+        lon: latlon.lon
+      };
       var options = {
         zoom: 12,
         latlon: latlon
