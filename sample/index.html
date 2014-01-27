@@ -8,7 +8,7 @@
   <script src="js/jquery.js"></script>
   <script src="js/peer.js"></script>
   <!--<script src="https://maps.googleapis.com/maps/api/js?v=3.exp&sensor=false"></script>-->
-  <script src="http://developers.its-mo.com/apps/key/cgi/loader.cgi?key=6fd9cdd77d6152bba25b94ca5833d76e&ver=2.0&enc=SJIS&api=zdcmap.js,search.js,control.js,userwidget.js&force=1" type="text/javascript"></script>
+  <script src="http://218.225.89.161/cgi/loader.cgi?key=JSZ3b5685934066&ver=2.0&api=zdcmap.js,search.js,control.js,userwidget.js&force=1" type="text/javascript"></script>
 </head>
 <body>
 <div id="container">
@@ -36,8 +36,6 @@
         <h2>待ち合わせNAVIは、友達との待ち合わせをもっとスムーズにするためのサービスです。<br>右上のLINEボタンから待ち合わせをしたい友達にメッセージ(URL)を送ってください。</h2>
       </div>
   </header><!-- #masthead -->
-
-
   <div id="map">
     <div>
       <video id="self-video" autoplay="autoplay" muted></video>
@@ -52,36 +50,6 @@
     var map, myLatlon, localMarker, localMarkerColor,
         remoteMarker, remoteMarkerColor;
 
-    function initialize(lat, lon) {
-      var latlon = ZDC.wgsTotky(new ZDC.LatLon(lat, lon));
-      myLatlon = {
-        lat: latlon.lat,
-        lon: latlon.lon
-      };
-      var options = {
-        zoom: 12,
-        latlon: latlon
-      };
-      $('#map').css('height', $(window).height());
-      map = new ZDC.Map(document.getElementById('map'), options);
-      control_widget = new ZDC.Control(
-        {
-           pos: {
-               top: 10,
-               left: 10
-           },
-           type: ZDC.CTRL_TYPE_NORMAL
-        }
-      );
-      map.addWidget(control_widget);
-
-      // 自分のマーカを作成
-      localMarker = new ZDC.Marker(latlon, {
-        color: localMarkerColor
-      });
-      map.addWidget(localMarker);
-    }
-
     var destPeerId = location.hash;
     if (destPeerId) {
       destPeerId = destPeerId.replace('#', '');
@@ -92,41 +60,14 @@
       remoteMarkerColor = ZDC.MARKER_COLOR_ID_RED_L;
     }
 
-    navigator.getMedia = ( navigator.getUserMedia ||
+    navigator.getMedia = (navigator.getUserMedia ||
         navigator.webkitGetUserMedia ||
         navigator.mozGetUserMedia ||
         navigator.msGetUserMedia);
 
-
-    function addRemoteMarker(data) {
-      console.log(data);
-      // リモートがマーカを作成
-      var latlon = new ZDC.LatLon(data.lat, data.lon);
-      if (!remoteMarker) {
-        remoteMarker = new ZDC.Marker(latlon, {
-          color: remoteMarkerColor
-        });
-        map.addWidget(remoteMarker);
-      } else {
-        remoteMarker.moveLatLon(latlon);
-      }
-      navigator.geolocation.getCurrentPosition(function (position) {
-        var lat = position.coords.latitude;
-        var lon = position.coords.longitude;
-        var latlon = ZDC.wgsTotky(new ZDC.LatLon(lat, lon));
-        localMarker.moveLatLon(latlon);
-      });
-    }
-
     $(document).ready(function() {
-
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(function(position) {
-          var lat = position.coords.latitude;
-          var lon = position.coords.longitude;
-          initialize(lat, lon);
-        });
-      }
+      // 現在地の取得後、地図を作成
+      getCurrentLocationWithCallback(createMap);
 
       var peer = new Peer({key: 'c19ba4aa-5e7e-11e3-922a-9dbb37b59888'});
       peer.on('open', function(id) {
@@ -139,13 +80,11 @@
             audio: true
           },
           function(localMediaStream) {
+            // 接続される側の処理
             if (destPeerId) {
+              // 接続元のPeerIDを指定して接続開始
               var conn = peer.connect(destPeerId);
-              conn.on('open', function() {
-                // リモートが位置情報を受信
-                conn.on('data', addRemoteMarker);
-                sendPositionByInterval(conn);
-              });
+              exchangeLocationInfo(conn);
               var call = peer.call(destPeerId,
                   localMediaStream);
 
@@ -163,13 +102,9 @@
           }
       );
 
-      // 接続イベントの受信
+      // 接続イベントの受信(接続する側の処理)
       peer.on('connection', function(conn){
-        conn.on('open', function() {
-          // メッセージを受信
-          conn.on('data', addRemoteMarker);
-          sendPositionByInterval(conn);
-        });
+        exchangeLocationInfo(conn);
       });
 
       peer.on('call', function(call) {
@@ -193,6 +128,84 @@
       });
     });
 
+    function getCurrentLocationWithCallback(callback) {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            function(position) {
+              var lat = position.coords.latitude;
+              var lon = position.coords.longitude;
+              var latlon = ZDC.wgsTotky(new ZDC.LatLon(lat, lon));
+              if (localMarker) {
+                localMarker.moveLatLon(latlon);
+              }
+              myLatlon = {
+                lat: latlon.lat,
+                lon: latlon.lon
+              };
+              if (callback) {
+                callback(latlon);
+              }
+            },
+            function(err) {
+              console.error(err);
+            },
+            {
+              enableHighAccuracy: true,
+              timeout: 5000,
+              maximumAge: 0
+            }
+        );
+      }
+    }
+
+    function createMap(latlon) {
+      var options = {
+        zoom: 12,
+        latlon: latlon
+      };
+      $('#map').css('height', $(window).height());
+      map = new ZDC.Map(document.getElementById('map'), options);
+      // 自分のマーカを作成
+      localMarker = new ZDC.Marker(latlon, {
+        color: localMarkerColor
+      });
+      map.addWidget(localMarker);
+      control_widget = new ZDC.Control(
+          {
+            pos: {
+              top: 10,
+              left: 10
+            },
+            type: ZDC.CTRL_TYPE_NORMAL
+          }
+      );
+      map.addWidget(control_widget);
+    }
+
+    function exchangeLocationInfo(conn) {
+      conn.on('open', function () {
+        // リモートが位置情報を受信
+        conn.on('data', addRemoteMarker);
+        conn.send(myLatlon);
+        sendPositionByInterval(conn);
+      });
+    }
+
+    function addRemoteMarker(data) {
+      console.log(data);
+      // リモートがマーカを作成
+      var latlon = new ZDC.LatLon(data.lat, data.lon);
+      if (!remoteMarker) {
+        remoteMarker = new ZDC.Marker(latlon, {
+          color: remoteMarkerColor
+        });
+        map.addWidget(remoteMarker);
+      } else {
+        remoteMarker.moveLatLon(latlon);
+      }
+      getCurrentLocationWithCallback();
+    }
+
     function shortenMyUrl(id) {
       var myUrl = location.href.split('#')[0] + '#' + id;
       $.ajax({
@@ -212,17 +225,8 @@
 
     function sendPositionByInterval(conn) {
       setInterval(function () {
-        navigator.geolocation.getCurrentPosition(function (position) {
-          var lat = position.coords.latitude;
-          var lon = position.coords.longitude;
-          var latlon = ZDC.wgsTotky(new ZDC.LatLon(lat, lon));
-          var obj = {
-            lat: latlon.lat,
-            lon: latlon.lon
-          };
-          conn.send(obj);
-        });
-      }, 1000);
+        conn.send(myLatlon);
+      }, 2000);
     }
 
     function createVideoByStream(id, stream) {
