@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>テスト</title>
+  <script src="https://skyway.io/dist/0.3/peer.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+</head>
+<style type="text/css">
+  input {
+    font-size: 2rem;
+  }
+  .label {
+    font-size: 2rem;
+  }
+</style>
+<body>
+  <div>
+    <input type="text" id="peer-id" style="width: 100%;">
+  </div>
+  <div>
+    <span class="label">接続先 : </span>
+    <input type="text" id="dest-peer-id" style="width: 80%;">
+    <input type="button" id="send-btn" value="送信">
+  </div>
+  <ul id="result"></ul>
+  <script type="text/javascript">
+    $(document).ready(function() {
+      var peer = new Peer({key: 'c19ba4aa-5e7e-11e3-922a-9dbb37b59888'});
+      peer.on('open', function(id) {
+        $('#peer-id').val(id);
+      });
+
+      $('#send-btn').on('click', function() {
+        var destPeerId = $('#dest-peer-id').val();
+        if (destPeerId) {
+          console.log(destPeerId);
+          var conn = peer.connect(destPeerId);
+          conn.on('open', function() {
+            // メッセージを受信
+            conn.on('data', function(data) {
+              $('#result').append('<li>Received : ' + data + '</li>');
+            });
+            // メッセージを送信
+            conn.send('from dest Hello!');
+          });
+        }
+      });
+
+      peer.on('connection', function(conn) {
+        conn.on('open', function() {
+          // メッセージを受信
+          conn.on('data', function(data) {
+            $('#result').append('<li>origin Received : ' + data + '</li>');
+          });
+          // メッセージを送信
+          conn.send('to dest Hello!');
+        });
+      });
+
+    });
+  </script>
+</body>
+</html>
