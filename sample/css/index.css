@@ -10,7 +10,7 @@ input.wider {
 video {
   max-width: 35%;
   display: none;
-  min-width: 45%;
+  max-height: 45%;
 }
 
 div#map {
