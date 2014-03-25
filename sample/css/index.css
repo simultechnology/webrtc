@@ -35,7 +35,7 @@ video#counter-video {
 }
 
 #masthead {
-    padding-top: 30px;
+    /*padding-top: 30px;*/
     position: relative;
 }
 #site-name {
@@ -84,7 +84,7 @@ body {
 #container {
   background-color: #FFFFE5;
   padding: 10px;
-  margin: 30px 20px;
+  margin: 30px 20px 20px 20px;
 }
 
 #send_menu {

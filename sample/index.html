@@ -163,7 +163,7 @@
         zoom: 12,
         latlon: latlon
       };
-      $('#map').css('height', $(window).height());
+      $('#map').css('height', $(window).height() - $('#masthead').height() - 110);
       map = new ZDC.Map(document.getElementById('map'), options);
       // 自分のマーカを作成
       localMarker = new ZDC.Marker(latlon, {
