@@ -39,20 +39,42 @@ video#counter-video {
     position: relative;
 }
 #site-name {
-    width: 30%;
-    float:left;
+    width: 100%;
+    /*float:left;*/
+    text-align: center;
 }
 #site-name a:link,
 #site-name a:visited {
     color: #000;
     text-decoration: none;
-    background-color: white;
+    background-color: #FFFFE5;
     padding: 10px;
 }
 #site-name a:hover,
 #site-name a:active {
     color: #666;
     text-decoration: none;
+}
+
+#url {
+  text-align: center;
+  overflow: hidden;
+  position: relative;
+}
+
+#url ul {
+  list-style: none outside none;
+  float: left;
+  margin: 0 0 0 0;
+  padding: 0;
+  position: relative;
+  left: 50%;
+}
+
+#url li {
+  float: left;
+  position: relative;
+  left: -50%;
 }
 
 body {

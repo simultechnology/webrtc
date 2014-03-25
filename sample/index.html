@@ -17,21 +17,21 @@
           <h1><a href="#" rel="home">待ち合わせ NAVI</a></h1>
       </div>
 
-      <div id="send_menu">
-        <div id="line_btn">
-          <a href="http://line.naver.jp/R/msg/text/?LINE%E3%81%A7%E9%80%81%E3%82%8B%0D%0Ahttp%3A%2F%2Fline.naver.jp%2F"><img src="./images/linebutton_36x60.png" width="40" height="65" alt="LINE"></a>
-          <span>
+    <div id="url">
+      <ul>
+        <li>
           <script type="text/javascript" src="//media.line.naver.jp/js/line-button.js?v=20131101" ></script>
           <script type="text/javascript">
-          new jp.naver.line.media.LineButton({"pc":false,"lang":"ja","type":"e","text":"ここにURLを挿入","withUrl":true});
+            new jp.naver.line.media.LineButton({"pc":true,"lang":"ja","type":"e","text":"ここにURLを挿入","withUrl":true});
           </script>
-          </span>
-        </div><!-- #line_btn -->
-        <div id="url">
-          <input type="text" id="dist-peer-id" class="wider">
+        </li>
+        <li>
+          <input type="text" id="dist-peer-id">
           <input type="button" id="send-btn" value="copy">
-        </div><!-- #url -->
-      </div><!-- #send_menu -->
+        </li>
+      </ul>
+
+    </div><!-- #url -->
       <div>
         <h2>待ち合わせNAVIは、友達との待ち合わせをもっとスムーズにするためのサービスです。<br>右上のLINEボタンから待ち合わせをしたい友達にメッセージ(URL)を送ってください。</h2>
       </div>
