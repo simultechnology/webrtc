@@ -72,6 +72,7 @@
       var peer = new Peer({key: 'c19ba4aa-5e7e-11e3-922a-9dbb37b59888'});
       peer.on('open', function(id) {
         shortenMyUrl(id);
+
       });
 
       navigator.getMedia(
@@ -219,6 +220,11 @@
           $('#dist-peer-id').val(shortenedUrl);
           $('#dist-peer-id').focus();
           $('#dist-peer-id').select();
+
+          var href = $('#url a').attr('href');
+          href = href.replace(/\?.*/, '?');
+          href += shortenedUrl;
+          $('#url a').attr('href', href);
         }
       });
     }
