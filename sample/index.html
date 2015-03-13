@@ -69,7 +69,7 @@
       // 現在地の取得後、地図を作成
       getCurrentLocationWithCallback(createMap);
 
-      var peer = new Peer({key: 'c19ba4aa-5e7e-11e3-922a-9dbb37b59888'});
+      var peer = new Peer({key: '53402148-7030-44f5-ac4e-9811478cbecb'});
       peer.on('open', function(id) {
         shortenMyUrl(id);
 
@@ -202,7 +202,9 @@
         });
         map.addWidget(remoteMarker);
       } else {
-        remoteMarker.moveLatLon(latlon);
+          if (remoteMarker) {
+              remoteMarker.moveLatLon(latlon);
+          }
       }
       getCurrentLocationWithCallback();
     }
